@@ -1631,18 +1631,6 @@
       }
     }
 
-    // Dummy form handling – prevent reload (replace with real backend / Google Form)
-    function attachFakeSubmit(formId) {
-      const form = document.getElementById(formId);
-      form.addEventListener("submit", function (event) {
-        event.preventDefault();
-        alert(
-          "Form captured!\n\nIn live version, connect this form to your backend or embed your Google Form link."
-        );
-      });
-    }
-    attachFakeSubmit("brandForm");
-    attachFakeSubmit("creatorForm");
 
     // Footer year
     document.getElementById("year").textContent =
@@ -1701,5 +1689,41 @@
       }
     });
   </script>
+  <script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzG-8sC6v93P5fjEu0RKLXL0UmZHL9c5ZhBPHW2YV6hKqut3xXDJ7pHGcNaM36fw6JvEA/exec";
+
+function bindForm(formId, type) {
+  const form = document.getElementById(formId);
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    formData.append("type", type);
+
+    fetch(WEB_APP_URL, {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.text())
+    .then(text => {
+      console.log("Apps Script:", text);
+      if (text.trim() === "success") {
+        alert("✅ Submitted successfully!");
+        form.reset();
+      } else {
+        alert("❌ Server error: " + text);
+      }
+    })
+    .catch(err => {
+      alert("❌ Network error");
+      console.error(err);
+    });
+  });
+}
+
+bindForm("brandForm", "brand");
+bindForm("creatorForm", "creator");
+</script>
 </body>
 </html>
